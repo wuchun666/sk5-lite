@@ -58,7 +58,7 @@ passwd admin                 # 改 SK5 密码（admin 换成你的账号）
 useradd -r -M -s /usr/sbin/nologin 新用户 && passwd 新用户   # 加一个账号
 
 cat /etc/danted.conf         # 配置文件
-tail -f /var/log/danted.log  # 日志（或 journalctl -u danted）
+journalctl -fu danted        # 实时日志
 bash sk5.sh --uninstall      # 卸载
 ```
 

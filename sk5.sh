@@ -85,7 +85,8 @@ else
 fi
 
 {
-  echo "logoutput: /var/log/danted.log"
+  # 官方 danted.service 把 /var 挂为只读，日志只能走 stderr（由 journald 捕获）
+  echo "logoutput: stderr"
   if [ -n "$IPS" ]; then
     for ip in $IPS; do
       echo "internal: $ip port = $PORT"
@@ -124,8 +125,12 @@ fi
 echo "$USER_NAME:$PASSWD" | chpasswd
 
 # ---------- 启动 ----------
-systemctl enable danted >/dev/null 2>&1
 if command -v systemctl >/dev/null 2>&1; then
+  systemctl enable danted >/dev/null 2>&1
+  # 官方服务单元没有 Restart=，补一个 drop-in：崩溃后自动拉起
+  mkdir -p /etc/systemd/system/danted.service.d
+  printf '[Service]\nRestart=on-failure\nRestartSec=3\n' > /etc/systemd/system/danted.service.d/10-restart.conf
+  systemctl daemon-reload
   systemctl restart danted
 else
   /etc/init.d/danted restart
